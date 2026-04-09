@@ -54,7 +54,7 @@ const AdminDashboard = () => {
         <Message variant="danger">{error}</Message>
       ) : (
         <table style={{ width: '100%', borderCollapse: 'collapse', background: 'var(--surface)', borderRadius: '12px', overflow: 'hidden' }}>
-          <thead style={{ background: 'rgba(255,255,255,0.05)' }}>
+          <thead style={{ background: 'var(--background)' }}>
             <tr>
               <th style={{ padding: '1rem', textAlign: 'left' }}>ORDER ID</th>
               <th style={{ padding: '1rem', textAlign: 'left' }}>USER</th>
@@ -68,11 +68,11 @@ const AdminDashboard = () => {
               <tr key={order._id} style={{ borderTop: '1px solid var(--border)' }}>
                 <td style={{ padding: '1rem' }}>{order._id.substring(0, 8)}</td>
                 <td style={{ padding: '1rem' }}>{order.user?.name || 'Unknown'}</td>
-                <td style={{ padding: '1rem' }}>${order.totalPrice.toFixed(2)}</td>
+                <td style={{ padding: '1rem' }}>₹{order.totalPrice.toLocaleString('en-IN')}</td>
                 <td style={{ padding: '1rem' }}>
                   <span className="badge" style={{ 
-                        background: order.status === 'delivered' ? 'rgba(74, 222, 128, 0.2)' : 'rgba(250, 204, 21, 0.2)',
-                        color: order.status === 'delivered' ? '#4ade80' : '#facc15'
+                        background: order.status === 'delivered' ? 'rgba(22, 163, 74, 0.1)' : 'rgba(202, 138, 4, 0.1)',
+                        color: order.status === 'delivered' ? '#16a34a' : '#ca8a04'
                       }}>
                         {order.status}
                       </span>

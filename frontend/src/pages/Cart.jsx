@@ -40,7 +40,7 @@ const Cart = () => {
                     {item.name || (item.product && item.product.name)}
                   </Link>
                 </div>
-                <div style={{ fontSize: '1.2rem', fontWeight: 600 }}>${item.price || (item.product && item.product.price)}</div>
+                <div style={{ fontSize: '1.2rem', fontWeight: 600 }}>₹{item.price || (item.product && item.product.price)}</div>
                 <select
                   className="form-control"
                   style={{ width: '80px' }}
@@ -70,7 +70,7 @@ const Cart = () => {
               Subtotal ({cart.reduce((acc, item) => acc + item.qty, 0)}) items
             </h3>
             <div style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '2rem' }}>
-              ${cart.reduce((acc, item) => acc + item.qty * (item.price || (item.product && item.product.price)), 0).toFixed(2)}
+              ₹{cart.reduce((acc, item) => acc + item.qty * (item.price || (item.product && item.product.price)), 0).toLocaleString('en-IN')}
             </div>
             <button
               type="button"

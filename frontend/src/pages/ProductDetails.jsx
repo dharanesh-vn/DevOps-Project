@@ -56,8 +56,8 @@ const ProductDetails = () => {
           </p>
           
           <div className="flex justify-between align-center" style={{ marginBottom: '2rem', padding: '1rem 0', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
-            <span style={{ fontSize: '2rem', fontWeight: 700 }}>${product.price}</span>
-            <span style={{ color: product.countInStock > 0 ? '#4ade80' : '#f87171', fontWeight: 600 }}>
+            <span style={{ fontSize: '2rem', fontWeight: 700 }}>₹{product.price.toLocaleString('en-IN')}</span>
+            <span style={{ color: product.countInStock > 0 ? '#16a34a' : '#dc2626', fontWeight: 600 }}>
               {product.countInStock > 0 ? 'In Stock' : 'Out of Stock'}
             </span>
           </div>
