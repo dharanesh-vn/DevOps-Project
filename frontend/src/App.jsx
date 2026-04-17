@@ -11,7 +11,21 @@ import AdminDashboard from './pages/AdminDashboard';
 function App() {
   return (
     <Router>
+
+      {/* 🔥 DEVOPS BANNER (NEW) */}
+      <div style={{
+        background: "#111",
+        color: "#00ffcc",
+        textAlign: "center",
+        padding: "8px",
+        fontSize: "14px",
+        fontWeight: "bold"
+      }}>
+        🚀 DevOps Pipeline Active | Auto Deployment Enabled
+      </div>
+
       <Header />
+
       <main className="container" style={{ padding: '2rem 1rem' }}>
         <Routes>
           <Route path="/" element={<Home />} />
