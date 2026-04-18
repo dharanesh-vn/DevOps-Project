@@ -3,7 +3,6 @@ pipeline {
 
     environment {
         DOCKER_USER = "roronoazoro1350"
-        IMAGE_TAG = "${BUILD_NUMBER}"
     }
 
     stages {
@@ -33,23 +32,46 @@ pipeline {
             }
         }
 
+        // 🔥 WAIT FOR SONAR (CRITICAL FIX)
+        stage('Wait for SonarQube') {
+            steps {
+                sh '''
+                echo "Waiting for SonarQube to be ready..."
+                until curl -s http://localhost:9000 | grep -q "UP"; do
+                  sleep 5
+                done
+                echo "SonarQube is ready"
+                '''
+            }
+        }
+
+        // 🔍 SONAR ANALYSIS
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('SonarQube') {
-                    sh './sonar-scanner/bin/sonar-scanner'
+                    withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                        sh '''
+                        ./sonar-scanner/bin/sonar-scanner \
+                        -Dsonar.projectKey=Ecommerce-Project \
+                        -Dsonar.sources=backend/src,frontend/src \
+                        -Dsonar.host.url=http://localhost:9000 \
+                        -Dsonar.login=$SONAR_TOKEN
+                        '''
+                    }
                 }
             }
         }
 
+        // ⏳ QUALITY GATE (FIXED TIMEOUT)
         stage('Quality Gate') {
             steps {
-                timeout(time: 3, unit: 'MINUTES') {
+                timeout(time: 10, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
             }
         }
 
-        // 🔐 Docker Login Clean
+        // 🔐 CLEAN DOCKER LOGIN
         stage('Docker Clean') {
             steps {
                 sh '''
@@ -59,6 +81,7 @@ pipeline {
             }
         }
 
+        // 🔐 DOCKER LOGIN (SECURE)
         stage('Docker Login') {
             steps {
                 withCredentials([usernamePassword(
@@ -73,53 +96,23 @@ pipeline {
             }
         }
 
+        // 🐳 BUILD IMAGES
         stage('Build Docker Images') {
             steps {
                 sh '''
-                docker build --pull -t $DOCKER_USER/backend:$IMAGE_TAG -f docker/backend.Dockerfile .
-                docker build --pull -t $DOCKER_USER/frontend:$IMAGE_TAG -f docker/frontend.Dockerfile .
+                docker build --pull -t roronoazoro1350/backend:latest -f docker/backend.Dockerfile .
+                docker build --pull -t roronoazoro1350/frontend:latest -f docker/frontend.Dockerfile .
                 '''
             }
         }
 
+        // 🚀 PUSH IMAGES
         stage('Push Docker Images') {
             steps {
                 sh '''
-                docker push $DOCKER_USER/backend:$IMAGE_TAG
-                docker push $DOCKER_USER/frontend:$IMAGE_TAG
+                docker push roronoazoro1350/backend:latest
+                docker push roronoazoro1350/frontend:latest
                 '''
-            }
-        }
-
-        // 🔥 CRITICAL: UPDATE K8S MANIFESTS
-        stage('Update Kubernetes Manifests') {
-            steps {
-                sh '''
-                sed -i "s|image: .*backend:.*|image: $DOCKER_USER/backend:$IMAGE_TAG|" k8s/backend-deployment.yaml
-                sed -i "s|image: .*frontend:.*|image: $DOCKER_USER/frontend:$IMAGE_TAG|" k8s/frontend-deployment.yaml
-                '''
-            }
-        }
-
-        // 🔥 CRITICAL: PUSH BACK TO GITHUB (TRIGGERS ARGOCD)
-        stage('Push Manifest Changes') {
-            steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'github-creds',
-                    usernameVariable: 'GIT_USER',
-                    passwordVariable: 'GIT_PASS'
-                )]) {
-                    sh '''
-                    git config user.name "jenkins"
-                    git config user.email "jenkins@example.com"
-
-                    git add k8s/
-
-                    git commit -m "Update images via Jenkins [CI]" || echo "No changes"
-
-                    git push https://$GIT_USER:$GIT_PASS@github.com/dharanesh-vn/DevOps-Project.git main
-                    '''
-                }
             }
         }
     }
